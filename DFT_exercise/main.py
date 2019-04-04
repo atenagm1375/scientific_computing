@@ -19,3 +19,11 @@ M = np.max(np.max(Zlog))
 # print("Zlog:\n", Zlog)
 # print("M:\n", M)
 show_image("dft", Zlog/M)
+
+M = np.max(np.max(np.abs(Z)))
+thresh_list = [0.0001, 0.001, 0.01, 0.05]
+
+for thresh in thresh_list:
+    Zthresh = np.multiply(np.abs(Z) > thresh * M, Z)
+    print("Fraction of Fourier coefficients survived the cut:",
+            np.sum(np.sum(np.abs(Zthresh) > 0)) / img.shape[0] / img.shape[1])
