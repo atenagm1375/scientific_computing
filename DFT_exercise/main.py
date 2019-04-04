@@ -27,3 +27,9 @@ for thresh in thresh_list:
     Zthresh = np.multiply(np.abs(Z) > thresh * M, Z)
     print("Fraction of Fourier coefficients survived the cut:",
             np.sum(np.sum(np.abs(Zthresh) > 0)) / img.shape[0] / img.shape[1])
+
+    zthresh = np.real(np.fft.ifft2(Zthresh))
+    show_image("dft with thresholding", zthresh)
+
+    print("Distortion of compressed signal:", 100 * np.linalg.norm(img - zthresh, 'fro') ** 2 \
+            / np.linalg.norm(img, 'fro') ** 2)
