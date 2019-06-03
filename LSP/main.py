@@ -1,5 +1,6 @@
 import numpy as np
-import numpy.linalg as la
+import scipy.linalg as la
+import time
 
 
 def read_matrix_dimension():
@@ -46,21 +47,35 @@ def solve_lsp_using_svd(A, b, n, r):
         y = float(y)
     v = np.transpose(vt)[:, :r]
     x = v.dot(y)
-    remainder = la.norm(bbar[r+1:])
-    return x, remainder
+    remainder = la.norm(bbar[r:]) if r < n else 0
+    return x.reshape((n,)), remainder
 
 
 def solve_lsp_using_qr(A, b, n, r):
-    pass
+    q, R, p = la.qr(A, pivoting=True)
+    bbar = np.transpose(q).dot(b)
+    y = la.lstsq(R[:n, :n], bbar[:n])[0]
+    x = y[p]
+    remainder = la.norm(bbar[r:]) if r < n else 0
+    return x.reshape((n,)), remainder
+
+
+def lsp_solver(func, A, b, n, r, method):
+    start = time.time()
+    x, remainder = func(A, b, n, r)
+    svd_time = time.time() - start
+    print("Solved LSP using {} in {} ms. Here's the results:".format(method, np.round(svd_time * 1000, decimals=2)))
+    print("x:", x)
+    print("remainder:", remainder)
 
 
 def __main__():
     m, n = read_matrix_dimension()
     A = read_matrix(m, n)
     b = read_vector(m)
-    rank_A = la.matrix_rank(A)
-    x, remainder = solve_lsp_using_svd(A, b, n, rank_A)
-    print(x, remainder)
+    rank_A = np.linalg.matrix_rank(A)
+    lsp_solver(solve_lsp_using_svd, A, b, n, rank_A, 'SVD')
+    lsp_solver(solve_lsp_using_qr, A, b, n, rank_A, 'QR')
 
 
 __main__()
