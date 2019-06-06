@@ -2,17 +2,17 @@ import cv2
 import os
 import numpy as np
 from scipy.linalg import svd
+from preprocess import *
 
 
-def load_dataset(name='grimace'):
+def load_dataset(name='faces96'):
     dir = './datasets/{}/'.format(name)
     people_names = os.listdir(dir)
     dataset = []
     for key in people_names:
-        dataset += [(cv2.imread(dir + key + '/' + x, 0), key) for x in os.listdir(dir + key)]
+        dataset += [(cv2.imread(dir + key + '/' + x, 0), key) for x in os.listdir(dir + key) if x.endswith('.jpg')]
     for i in range(len(dataset)):
-        s1, s2 = dataset[i][0].shape
-        dataset[i] = (cv2.resize(dataset[i][0], (s1//2, s2//2)), dataset[i][1])
+        dataset[i] = (resize_image(dataset[i][0]), dataset[i][1])
     return dataset
 
 

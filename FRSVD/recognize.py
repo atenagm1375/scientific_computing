@@ -27,9 +27,13 @@ def __main__():
     r = 100
     ur = u[:, :r]
     X = np.matmul(ur.transpose(), A)
+    count = 0
     for f, label in zip(x_test, y_test):
         indx = recognize(f, fbar, X, ur)
         print('This image is recognized as {}. It really is {}.'.format(y_train[indx], label))
+        if y_train[indx] != label:
+            count += 1
+    print('error:', count / len(y_test))
 
 
 DIR = './temp/'
