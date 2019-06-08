@@ -17,22 +17,24 @@ def read_matrix_dimension():
 
 
 def read_matrix(m, n):
-    A = np.zeros((m, n))
+    A = np.zeros((m, n), dtype=np.complex)
     print("Enter rows of the matrix A(separate elements of each row with space):")
     try:
         for i in range(m):
-            A[i, :] = [float(j) for j in input().strip().split()]
-    except Exception:
+            A[i, :] = np.array([j for j in input().strip().split()]).astype(np.complex)
+    except Exception as e:
+        raise e
+        print(e)
         print("Invalid input for matrix A. Please try again.")
         return read_matrix(m, n)
     return A
 
 
 def read_vector(m):
-    b = np.zeros(m)
+    b = np.zeros(m, dtype=np.complex)
     print("Enter elements of the vector b of size {}(separate them with space):".format(m))
     try:
-        b[:] = [float(j) for j in input().strip().split()]
+        b[:] = np.array([j for j in input().strip().split()]).astype(np.complex)
     except Exception:
         print("Invalid input for vector b. Please try again!")
         return read_vector(m)
@@ -41,11 +43,12 @@ def read_vector(m):
 
 def solve_lsp_using_svd(A, b, n, r):
     u, sigma, vt = la.svd(A)
-    bbar = np.transpose(u).dot(b)
-    y = bbar[:r] / sigma[:r]
+    bbar = np.transpose(np.conj(u)).dot(b)
+    y = np.zeros(n, dtype=np.complex)
+    y[:r] = bbar[:r] / sigma[:r]
     if len(y) == 1:
         y = float(y)
-    v = np.transpose(vt)[:, :r]
+    v = np.transpose(np.conj(vt))
     x = v.dot(y)
     remainder = la.norm(bbar[r:]) if r < n else 0
     return x.reshape((n,)), remainder
@@ -53,8 +56,9 @@ def solve_lsp_using_svd(A, b, n, r):
 
 def solve_lsp_using_qr(A, b, n, r):
     q, R, p = la.qr(A, pivoting=True)
-    bbar = np.transpose(q).dot(b)
-    y = la.lstsq(R[:n, :n], bbar[:n])[0]
+    bbar = np.transpose(np.conj(q)).dot(b)
+    y = np.zeros(n, dtype=np.complex)
+    y[:r] = la.solve(R[:r, :r], bbar[:r])
     x = y[p]
     remainder = la.norm(bbar[r:]) if r < n else 0
     return x.reshape((n,)), remainder
